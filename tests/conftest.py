@@ -1,5 +1,3 @@
-"""Общие настройки тестов (pytest подхватывает этот файл автоматически)."""
-
 import pytest
 from alembic import command
 from alembic.config import Config
@@ -30,7 +28,6 @@ def client(tmp_path):
         finally:
             db.close()
 
-    # Подменяем настоящую БД на тестовую
     app.dependency_overrides[get_db] = get_test_db
     yield TestClient(app)
     app.dependency_overrides.clear()

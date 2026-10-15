@@ -1,10 +1,4 @@
-"""Integration-тесты: отправляют настоящие HTTP-запросы к API, которое работает с БД."""
-
 from app.config import MAX_ACTIVE_LOANS
-
-
-# ---------- Вспомогательные функции ----------
-
 
 def create_book(client, copies=1):
     response = client.post(
@@ -25,11 +19,7 @@ def issue_book(client, book_id, reader_id):
     return client.post("/loans", json={"book_id": book_id, "reader_id": reader_id})
 
 
-# ---------- Тесты ----------
-
-
 def test_book_crud(client):
-    """Создание, чтение, изменение и удаление книги."""
     book = create_book(client)
     assert book["available_copies"] == 1
 
@@ -46,7 +36,6 @@ def test_book_crud(client):
 
 
 def test_issue_and_return_book(client):
-    """Выдача уменьшает число свободных экземпляров, возврат — увеличивает."""
     book = create_book(client, copies=1)
     reader = create_reader(client)
 
@@ -60,12 +49,10 @@ def test_issue_and_return_book(client):
     assert response.json()["return_date"] is not None
     assert client.get(f"/books/{book['id']}").json()["available_copies"] == 1
 
-    # Вернуть ту же книгу второй раз нельзя
     assert client.post(f"/loans/{loan['id']}/return").status_code == 409
 
 
 def test_cannot_issue_book_without_free_copies(client):
-    """Правило 1: последний экземпляр нельзя выдать дважды."""
     book = create_book(client, copies=1)
     first = create_reader(client, "first@mail.ru")
     second = create_reader(client, "second@mail.ru")
@@ -77,7 +64,6 @@ def test_cannot_issue_book_without_free_copies(client):
 
 
 def test_reader_loan_limit(client):
-    """Правило 2: читатель не может взять больше MAX_ACTIVE_LOANS книг."""
     book = create_book(client, copies=MAX_ACTIVE_LOANS + 1)
     reader = create_reader(client)
 
@@ -87,7 +73,6 @@ def test_reader_loan_limit(client):
 
 
 def test_cannot_delete_reader_with_active_loan(client):
-    """Правило 4: читателя с книгой на руках удалить нельзя."""
     book = create_book(client)
     reader = create_reader(client)
     loan = issue_book(client, book["id"], reader["id"]).json()
@@ -99,7 +84,6 @@ def test_cannot_delete_reader_with_active_loan(client):
 
 
 def test_errors(client):
-    """Обработка ошибок: неверные данные (422), не найдено (404), дубликат (409)."""
     assert client.post("/books", json={"title": "", "author": "X"}).status_code == 422
     assert client.post("/readers", json={"name": "Иван", "email": "bad"}).status_code == 422
     assert client.get("/books/999").status_code == 404

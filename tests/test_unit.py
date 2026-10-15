@@ -1,5 +1,3 @@
-"""Unit-тесты: проверяют отдельные функции без запуска сервера и без БД."""
-
 from datetime import date
 
 import pytest
@@ -12,7 +10,7 @@ from app.schemas import BookCreate, ReaderCreate
 
 
 def test_book_available_when_copies_left():
-    rules.check_book_available(1)  # исключения нет — значит, всё в порядке
+    rules.check_book_available(1)
 
 
 def test_book_not_available_when_no_copies():
@@ -32,7 +30,7 @@ def test_reader_at_limit_cannot_borrow():
 
 
 def test_book_cannot_be_returned_twice():
-    rules.check_not_returned(None)  # ещё не возвращена — можно вернуть
+    rules.check_not_returned(None)
     with pytest.raises(HTTPException):
         rules.check_not_returned(date(2026, 10, 1))
 

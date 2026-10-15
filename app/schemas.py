@@ -2,8 +2,6 @@ from datetime import date
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-# ---------- Книги ----------
-
 
 class BookCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200, examples=["Война и мир"])
@@ -19,7 +17,7 @@ class BookUpdate(BaseModel):
 
 
 class BookOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)  # разрешает строить схему из ORM-объекта
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     title: str
@@ -29,9 +27,7 @@ class BookOut(BaseModel):
     available_copies: int
 
 
-# ---------- Читатели ----------
-
-PHONE_PATTERN = r"^\+?\d{10,15}$" 
+PHONE_PATTERN = r"^\+?\d{10,15}$"
 
 
 class ReaderCreate(BaseModel):
@@ -53,9 +49,6 @@ class ReaderOut(BaseModel):
     name: str
     email: str
     phone: str | None
-
-
-# ---------- Выдачи ----------
 
 
 class LoanCreate(BaseModel):

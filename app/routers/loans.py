@@ -1,5 +1,3 @@
-"""Эндпоинты для выдач книг: /loans"""
-
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -47,14 +45,13 @@ def issue_book(data: LoanCreate, db: Session = Depends(get_db)):
     if reader is None:
         raise HTTPException(status_code=404, detail="Читатель не найден")
 
-    # Проверяем бизнес-правила
     active_loans = sum(1 for loan in reader.loans if loan.return_date is None)
     rules.check_reader_limit(active_loans)
     rules.check_book_available(book.available_copies)
 
     today = date.today()
     loan = Loan(book=book, reader=reader, issue_date=today, due_date=rules.calc_due_date(today))
-    book.available_copies -= 1  # один экземпляр ушёл с полки
+    book.available_copies -= 1
     db.add(loan)
     db.commit()
     db.refresh(loan)
@@ -67,7 +64,7 @@ def return_book(loan_id: int, db: Session = Depends(get_db)):
     rules.check_not_returned(loan.return_date)
 
     loan.return_date = date.today()
-    loan.book.available_copies += 1  # экземпляр вернулся на полку
+    loan.book.available_copies += 1
     db.commit()
     db.refresh(loan)
     return loan

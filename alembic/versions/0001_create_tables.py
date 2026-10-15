@@ -34,7 +34,6 @@ def upgrade():
         sa.Column("return_date", sa.Date(), nullable=True),
     )
 
-
 def downgrade():
     op.drop_table("loans")
     op.drop_table("readers")

@@ -1,9 +1,3 @@
-"""Точка входа: создаём приложение FastAPI и подключаем эндпоинты.
-
-Запуск: uvicorn app.main:app
-Документация API: http://localhost:8000/docs
-"""
-
 from fastapi import FastAPI
 
 from app.routers import books, loans, readers
