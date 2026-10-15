@@ -1,0 +1,37 @@
+# Запуск: docker compose up --build
+
+services:
+  # ---------- База данных PostgreSQL ----------
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # данные БД хранятся в именованном volume
+    networks:
+      - library-network
+    healthcheck:                          # проверка, что БД готова принимать подключения
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------- Приложение (FastAPI) ----------
+  backend:
+    build: .                              # собрать образ из Dockerfile в этой папке
+    env_file: .env                        # передать настройки как переменные окружения
+    ports:
+      - "8000:8000"                       # порт компьютера : порт контейнера
+    networks:
+      - library-network
+    depends_on:
+      db:
+        condition: service_healthy        # стартовать только после того, как БД готова
+
+networks:
+  library-network:                        # общая сеть: backend обращается к БД по имени "db"
+
+volumes:
+  pgdata:                                 # именованный volume: данные переживают docker compose down
